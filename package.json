@@ -1,0 +1,34 @@
+{
+  "name": "eodhd-typescript-library",
+  "version": "0.1.0",
+  "description": "TypeScript adapter for EODHD APIs",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "eodhd",
+    "market-data",
+    "typescript",
+    "sdk"
+  ],
+  "license": "MIT"
+}
