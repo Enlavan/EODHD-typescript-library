@@ -1,7 +1,7 @@
 {
-  "name": "eodhd-typescript-library",
-  "version": "0.1.0",
-  "description": "TypeScript adapter for EODHD APIs",
+  "name": "eodhd",
+  "version": "1.0.0",
+  "description": "Official TypeScript client for the EODHD financial data APIs – historical prices, fundamentals, options, news, and 70+ endpoints",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,12 +9,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./apis": {
+      "types": "./dist/apis/index.d.ts",
+      "import": "./dist/apis/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",
@@ -24,11 +34,29 @@
   "engines": {
     "node": ">=18"
   },
+  "sideEffects": false,
   "keywords": [
     "eodhd",
+    "eodhistoricaldata",
     "market-data",
+    "stock-market",
+    "financial-data",
+    "historical-prices",
+    "fundamentals",
+    "real-time",
+    "options",
+    "dividends",
+    "news",
+    "sentiment",
+    "technical-indicators",
     "typescript",
     "sdk"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Enlavan/EODHD-typescript-library"
+  },
+  "homepage": "https://eodhd.com",
+  "author": "Enlavan",
   "license": "MIT"
 }

@@ -1,591 +1,724 @@
-import { EODHD_AUX_BASE_URL, EODHD_BASE_URL } from "./constants.js";
-import { EODHDConfigError, EODHDHttpError, EODHDTimeoutError } from "./errors.js";
+import {
+  BulkEodAPI,
+  BulkFundamentalsAPI,
+  CboeIndexDataAPI,
+  CboeIndicesListAPI,
+  EarningsTrendsAPI,
+  EconomicEventsAPI,
+  EodHistoricalDataAPI,
+  ExchangeDetailsAPI,
+  ExchangeTickersAPI,
+  ExchangesListAPI,
+  FinancialNewsAPI,
+  FundamentalsAPI,
+  HistoricalDividendsAPI,
+  HistoricalMarketCapAPI,
+  HistoricalSplitsAPI,
+  IllioBestWorstAPI,
+  IllioBetaBandsAPI,
+  IllioLargestVolatilityAPI,
+  IllioPerformanceInsightsAPI,
+  IllioPerformanceVsMarketAPI,
+  IllioRiskInsightsAPI,
+  IllioRiskReturnAPI,
+  IllioVolatilityBandsAPI,
+  IndexComponentsAPI,
+  IndicesListAPI,
+  InsiderTransactionsAPI,
+  IntradayDataAPI,
+  InvestverteListCompaniesAPI,
+  InvestverteListCountriesAPI,
+  InvestverteListSectorsAPI,
+  InvestverteViewCompanyAPI,
+  InvestverteViewCountryAPI,
+  InvestverteViewSectorAPI,
+  LiveExtendedQuotesAPI,
+  LiveStockPricesAPI,
+  LogoAPI,
+  LogoSvgAPI,
+  MacroIndicatorsAPI,
+  MarketplaceTickDataAPI,
+  NewsWordWeightsAPI,
+  OptionsContractsAPI,
+  OptionsEodAPI,
+  OptionsUnderlyingsAPI,
+  PraamsBankBalanceSheetByIsinAPI,
+  PraamsBankBalanceSheetByTickerAPI,
+  PraamsBankIncomeStatementByIsinAPI,
+  PraamsBankIncomeStatementByTickerAPI,
+  PraamsBondAnalyzeByIsinAPI,
+  PraamsReportBondByIsinAPI,
+  PraamsReportEquityByIsinAPI,
+  PraamsReportEquityByTickerAPI,
+  PraamsRiskScoringByIsinAPI,
+  PraamsRiskScoringByTickerAPI,
+  PraamsSmartScreenerBondAPI,
+  PraamsSmartScreenerEquityAPI,
+  SearchAPI,
+  SentimentDataAPI,
+  StockScreenerAPI,
+  SymbolChangeHistoryAPI,
+  TechnicalIndicatorAPI,
+  TickDataAPI,
+  TradingHoursListMarketsAPI,
+  TradingHoursLookupMarketsAPI,
+  TradingHoursMarketDetailsAPI,
+  TradingHoursMarketStatusAPI,
+  USTBillRatesAPI,
+  USTLongTermRatesAPI,
+  USTRealYieldRatesAPI,
+  USTYieldRatesAPI,
+  UpcomingDividendsAPI,
+  UpcomingEarningsAPI,
+  UpcomingIPOsAPI,
+  UpcomingSplitsAPI,
+  UserAPI,
+} from "./apis/index.js";
+import { BaseClient } from "./base.js";
 import type {
+  BulkEodParams,
+  BulkEodRecord,
+  BulkFundamentalsParams,
+  CalendarEarning,
+  CalendarIpo,
+  CalendarSplitRecord,
+  CboeIndex,
+  CboeIndexDataParams,
+  CboeIndicesListParams,
   DividendRecord,
-  EodBar,
+  EarningsTrend,
+  EarningsTrendsParams,
   EconomicEvent,
+  EconomicEventsParams,
+  EODHDClientOptions,
+  EodBar,
+  EodParams,
+  ExchangeDetails,
+  ExchangeDetailsParams,
+  ExchangeInfo,
+  ExchangeSymbol,
+  ExchangeTickersParams,
+  ExchangesListParams,
+  FinancialNewsParams,
+  FundamentalsParams,
   FundamentalsResponse,
+  HistoricalDividendsParams,
+  HistoricalMarketCapParams,
+  HistoricalMarketCapRecord,
+  HistoricalSplitsParams,
+  IllioCategoryInsight,
+  IllioChapterInsight,
+  IndexComponent,
+  IndexComponentsParams,
+  IndexInfo,
+  IndicesListParams,
+  InsiderTransaction,
+  InsiderTransactionsParams,
   IntradayBar,
+  IntradayParams,
+  InvestverteCompany,
+  InvestverteCountry,
+  InvestverteCountryView,
+  InvestverteEsgScore,
+  InvestverteEsgViewParams,
+  InvestverteSector,
+  InvestverteSectorView,
+  LiveExtendedQuote,
+  LiveExtendedQuotesParams,
+  LiveStockPricesParams,
+  MacroIndicatorParams,
   MacroIndicatorRecord,
+  MarketplaceTickDataParams,
+  MarketplaceTickDataResponse,
   NewsArticle,
+  NewsWordWeightsParams,
+  OptionsContract,
+  OptionsContractsParams,
+  OptionsEodParams,
+  OptionsEodRecord,
+  OptionsUnderlyingsParams,
+  PraamsBankBalanceSheetRecord,
+  PraamsBankIncomeStatementRecord,
+  PraamsBondAnalysis,
+  PraamsEquityAnalysis,
+  PraamsReportParams,
+  PraamsResponse,
+  PraamsScreenerBody,
+  PraamsScreenerParams,
+  PraamsScreenerResponse,
   RealTimeQuote,
-  ScreenerResult,
+  SearchParams,
+  SearchResult,
+  SentimentDataParams,
   SentimentRecord,
   SplitRecord,
-  TickTrade
+  StockScreenerParams,
+  StockScreenerResponse,
+  SymbolChange,
+  SymbolChangeHistoryParams,
+  TechnicalParams,
+  TechnicalRecord,
+  TickParams,
+  TickTrade,
+  TradingHoursListParams,
+  TradingHoursLookupParams,
+  TradingHoursMarket,
+  TradingHoursMarketDetail,
+  TradingHoursMarketDetailsParams,
+  TradingHoursMarketStatus,
+  TradingHoursMarketStatusParams,
+  UpcomingDividendsParams,
+  UpcomingDividendsResponse,
+  UpcomingEarningsParams,
+  UpcomingEarningsResponse,
+  UpcomingIposParams,
+  UpcomingIposResponse,
+  UpcomingSplitsParams,
+  UpcomingSplitsResponse,
+  USTBillRate,
+  USTLongTermRate,
+  USTPaginatedResponse,
+  USTRatesParams,
+  USTRealYieldRate,
+  USTYieldRate,
+  UserInfo,
 } from "./types.js";
 
-export type QueryValue = string | number | boolean | Date | null | undefined | Array<string | number | boolean | Date>;
+/**
+ * Full-featured EODHD API client.
+ *
+ * Provides two complementary access patterns:
+ *
+ * 1. **Modular** – access individual API modules as properties:
+ *    ```ts
+ *    client.eodHistoricalData.getEod("AAPL.US");
+ *    client.financialNews.getFinancialNews({ s: "AAPL.US" });
+ *    ```
+ *
+ * 2. **Flat** – call convenience methods directly on the client:
+ *    ```ts
+ *    client.getEod("AAPL.US");
+ *    client.getFinancialNews({ s: "AAPL.US" });
+ *    ```
+ *
+ * Both patterns produce identical results.
+ */
+export class EODHDClient extends BaseClient {
+  // ----- API modules (public, read-only) ----------------------------------
 
-export interface RequestOptions {
-  path: string;
-  method?: "GET" | "POST";
-  baseUrl?: string;
-  pathParams?: Record<string, string | number>;
-  params?: Record<string, QueryValue>;
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
-  responseType?: "json" | "text" | "arrayBuffer";
-}
-
-export interface EODHDClientOptions {
-  apiKey: string;
-  baseUrl?: string;
-  timeoutMs?: number;
-  fetch?: typeof fetch;
-  defaultParams?: Record<string, QueryValue>;
-  userAgent?: string;
-}
-
-export interface DateRangeParams {
-  from?: string;
-  to?: string;
-}
-
-export interface EodParams extends DateRangeParams {
-  period?: "d" | "w" | "m";
-  order?: "a" | "d";
-  fmt?: "json" | "csv";
-  filter?: "last_close" | "last_volume" | string;
-}
-
-export interface IntradayParams {
-  interval?: "1m" | "5m" | "1h" | string;
-  from?: number | string;
-  to?: number | string;
-  fmt?: "json" | "csv";
-  "split-dt"?: 0 | 1;
-}
-
-export interface RealTimeParams {
-  fmt?: "json" | "csv";
-  s?: string | string[];
-}
-
-export interface FundamentalsParams {
-  filter?: string;
-  fmt?: "json" | "csv";
-}
-
-export interface DividendsParams extends DateRangeParams {
-  fmt?: "json" | "csv";
-}
-
-export interface SplitsParams extends DateRangeParams {
-  fmt?: "json" | "csv";
-}
-
-export interface TechnicalParams {
-  function: string;
-  period?: number;
-  fmt?: "json" | "csv";
-  [key: string]: QueryValue;
-}
-
-export interface NewsParams {
-  s?: string | string[];
-  t?: string;
-  from?: string;
-  to?: string;
-  limit?: number;
-  offset?: number;
-  fmt?: "json" | "xml";
-}
-
-export interface SentimentParams extends DateRangeParams {
-  s?: string | string[];
-  fmt?: "json" | "csv";
-}
-
-export interface NewsWordWeightsParams extends DateRangeParams {
-  s?: string | string[];
-  limit?: number;
-  fmt?: "json" | "csv";
-}
-
-export interface ScreenerParams {
-  limit?: number;
-  offset?: number;
-  fmt?: "json" | "csv";
-  [key: string]: QueryValue;
-}
-
-export interface MacroIndicatorParams {
-  indicator: string;
-  fmt?: "json" | "csv";
-}
-
-export interface CalendarParams extends DateRangeParams {
-  fmt?: "json" | "csv";
-}
-
-export interface EconomicEventsParams extends DateRangeParams {
-  fmt?: "json" | "csv";
-}
-
-export interface ExchangeSymbolsParams {
-  fmt?: "json" | "csv";
-}
-
-export interface TickParams {
-  from?: number | string;
-  to?: number | string;
-  limit?: number;
-  fmt?: "json" | "csv";
-}
-
-export interface OptionsParams {
-  fmt?: "json" | "csv";
-  [key: string]: QueryValue;
-}
-
-export interface IndexComponentsParams {
-  fmt?: "json" | "csv";
-  [key: string]: QueryValue;
-}
-
-export interface CboeIndexParams {
-  fmt?: "json" | "xml";
-  "filter[index_code]": string;
-  "filter[feed_type]": string;
-  "filter[date]": string;
-}
-
-export interface CboeIndicesListParams {
-  fmt?: "json" | "xml";
-}
-
-export class EODHDClient {
-  private readonly apiKey: string;
-  private readonly baseUrl: string;
-  private readonly timeoutMs: number;
-  private readonly fetchImpl?: typeof fetch;
-  private readonly defaultParams: Record<string, QueryValue>;
-  private readonly userAgent?: string;
+  readonly eodHistoricalData: EodHistoricalDataAPI;
+  readonly intradayData: IntradayDataAPI;
+  readonly liveStockPrices: LiveStockPricesAPI;
+  readonly liveExtendedQuotes: LiveExtendedQuotesAPI;
+  readonly tickData: TickDataAPI;
+  readonly technicalIndicator: TechnicalIndicatorAPI;
+  readonly historicalMarketCap: HistoricalMarketCapAPI;
+  readonly fundamentals: FundamentalsAPI;
+  readonly bulkFundamentals: BulkFundamentalsAPI;
+  readonly historicalDividends: HistoricalDividendsAPI;
+  readonly historicalSplits: HistoricalSplitsAPI;
+  readonly bulkEod: BulkEodAPI;
+  readonly upcomingEarnings: UpcomingEarningsAPI;
+  readonly upcomingIpos: UpcomingIPOsAPI;
+  readonly upcomingSplits: UpcomingSplitsAPI;
+  readonly upcomingDividends: UpcomingDividendsAPI;
+  readonly earningsTrends: EarningsTrendsAPI;
+  readonly exchangesList: ExchangesListAPI;
+  readonly exchangeDetails: ExchangeDetailsAPI;
+  readonly exchangeTickers: ExchangeTickersAPI;
+  readonly search: SearchAPI;
+  readonly symbolChangeHistory: SymbolChangeHistoryAPI;
+  readonly financialNews: FinancialNewsAPI;
+  readonly sentimentData: SentimentDataAPI;
+  readonly newsWordWeights: NewsWordWeightsAPI;
+  readonly insiderTransactions: InsiderTransactionsAPI;
+  readonly macroIndicators: MacroIndicatorsAPI;
+  readonly economicEvents: EconomicEventsAPI;
+  readonly stockScreener: StockScreenerAPI;
+  readonly optionsContracts: OptionsContractsAPI;
+  readonly optionsEod: OptionsEodAPI;
+  readonly optionsUnderlyings: OptionsUnderlyingsAPI;
+  readonly indicesList: IndicesListAPI;
+  readonly indexComponents: IndexComponentsAPI;
+  readonly cboeIndicesList: CboeIndicesListAPI;
+  readonly cboeIndexData: CboeIndexDataAPI;
+  readonly logo: LogoAPI;
+  readonly logoSvg: LogoSvgAPI;
+  readonly user: UserAPI;
+  readonly marketplaceTickData: MarketplaceTickDataAPI;
+  readonly tradingHoursListMarkets: TradingHoursListMarketsAPI;
+  readonly tradingHoursLookupMarkets: TradingHoursLookupMarketsAPI;
+  readonly tradingHoursMarketDetails: TradingHoursMarketDetailsAPI;
+  readonly tradingHoursMarketStatus: TradingHoursMarketStatusAPI;
+  readonly ustBillRates: USTBillRatesAPI;
+  readonly ustLongTermRates: USTLongTermRatesAPI;
+  readonly ustYieldRates: USTYieldRatesAPI;
+  readonly ustRealYieldRates: USTRealYieldRatesAPI;
+  readonly illioBestWorst: IllioBestWorstAPI;
+  readonly illioBetaBands: IllioBetaBandsAPI;
+  readonly illioLargestVolatility: IllioLargestVolatilityAPI;
+  readonly illioPerformanceInsights: IllioPerformanceInsightsAPI;
+  readonly illioPerformanceVsMarket: IllioPerformanceVsMarketAPI;
+  readonly illioRiskInsights: IllioRiskInsightsAPI;
+  readonly illioRiskReturn: IllioRiskReturnAPI;
+  readonly illioVolatilityBands: IllioVolatilityBandsAPI;
+  readonly investverteListCompanies: InvestverteListCompaniesAPI;
+  readonly investverteListCountries: InvestverteListCountriesAPI;
+  readonly investverteListSectors: InvestverteListSectorsAPI;
+  readonly investverteViewCompany: InvestverteViewCompanyAPI;
+  readonly investverteViewCountry: InvestverteViewCountryAPI;
+  readonly investverteViewSector: InvestverteViewSectorAPI;
+  readonly praamsBankBalanceSheetByIsin: PraamsBankBalanceSheetByIsinAPI;
+  readonly praamsBankBalanceSheetByTicker: PraamsBankBalanceSheetByTickerAPI;
+  readonly praamsBankIncomeStatementByIsin: PraamsBankIncomeStatementByIsinAPI;
+  readonly praamsBankIncomeStatementByTicker: PraamsBankIncomeStatementByTickerAPI;
+  readonly praamsBondAnalyzeByIsin: PraamsBondAnalyzeByIsinAPI;
+  readonly praamsReportBondByIsin: PraamsReportBondByIsinAPI;
+  readonly praamsReportEquityByIsin: PraamsReportEquityByIsinAPI;
+  readonly praamsReportEquityByTicker: PraamsReportEquityByTickerAPI;
+  readonly praamsRiskScoringByIsin: PraamsRiskScoringByIsinAPI;
+  readonly praamsRiskScoringByTicker: PraamsRiskScoringByTickerAPI;
+  readonly praamsSmartScreenerBond: PraamsSmartScreenerBondAPI;
+  readonly praamsSmartScreenerEquity: PraamsSmartScreenerEquityAPI;
 
   constructor(options: EODHDClientOptions) {
-    if (!options?.apiKey) {
-      throw new EODHDConfigError("apiKey is required to create an EODHDClient");
-    }
+    super(options);
 
-    this.apiKey = options.apiKey;
-    this.baseUrl = options.baseUrl ?? EODHD_BASE_URL;
-    this.timeoutMs = options.timeoutMs ?? 30000;
-    this.fetchImpl = options.fetch;
-    this.defaultParams = options.defaultParams ?? {};
-    this.userAgent = options.userAgent;
+    const req = this.request.bind(this);
+
+    // Core market data
+    this.eodHistoricalData = new EodHistoricalDataAPI(req);
+    this.intradayData = new IntradayDataAPI(req);
+    this.liveStockPrices = new LiveStockPricesAPI(req);
+    this.liveExtendedQuotes = new LiveExtendedQuotesAPI(req);
+    this.tickData = new TickDataAPI(req);
+    this.technicalIndicator = new TechnicalIndicatorAPI(req);
+    this.historicalMarketCap = new HistoricalMarketCapAPI(req);
+
+    // Fundamentals
+    this.fundamentals = new FundamentalsAPI(req);
+    this.bulkFundamentals = new BulkFundamentalsAPI(req);
+
+    // Corporate actions
+    this.historicalDividends = new HistoricalDividendsAPI(req);
+    this.historicalSplits = new HistoricalSplitsAPI(req);
+
+    // Bulk
+    this.bulkEod = new BulkEodAPI(req);
+
+    // Calendar
+    this.upcomingEarnings = new UpcomingEarningsAPI(req);
+    this.upcomingIpos = new UpcomingIPOsAPI(req);
+    this.upcomingSplits = new UpcomingSplitsAPI(req);
+    this.upcomingDividends = new UpcomingDividendsAPI(req);
+    this.earningsTrends = new EarningsTrendsAPI(req);
+
+    // Exchanges & search
+    this.exchangesList = new ExchangesListAPI(req);
+    this.exchangeDetails = new ExchangeDetailsAPI(req);
+    this.exchangeTickers = new ExchangeTickersAPI(req);
+    this.search = new SearchAPI(req);
+    this.symbolChangeHistory = new SymbolChangeHistoryAPI(req);
+
+    // News & sentiment
+    this.financialNews = new FinancialNewsAPI(req);
+    this.sentimentData = new SentimentDataAPI(req);
+    this.newsWordWeights = new NewsWordWeightsAPI(req);
+
+    // Insider transactions
+    this.insiderTransactions = new InsiderTransactionsAPI(req);
+
+    // Macro & economic
+    this.macroIndicators = new MacroIndicatorsAPI(req);
+    this.economicEvents = new EconomicEventsAPI(req);
+
+    // Screener
+    this.stockScreener = new StockScreenerAPI(req);
+
+    // Options (Marketplace)
+    this.optionsContracts = new OptionsContractsAPI(req);
+    this.optionsEod = new OptionsEodAPI(req);
+    this.optionsUnderlyings = new OptionsUnderlyingsAPI(req);
+
+    // S&P Global indices (Marketplace)
+    this.indicesList = new IndicesListAPI(req);
+    this.indexComponents = new IndexComponentsAPI(req);
+
+    // CBOE
+    this.cboeIndicesList = new CboeIndicesListAPI(req);
+    this.cboeIndexData = new CboeIndexDataAPI(req);
+
+    // Logos
+    this.logo = new LogoAPI(req);
+    this.logoSvg = new LogoSvgAPI(req);
+
+    // User
+    this.user = new UserAPI(req);
+
+    // Marketplace tick data
+    this.marketplaceTickData = new MarketplaceTickDataAPI(req);
+
+    // TradingHours (Marketplace)
+    this.tradingHoursListMarkets = new TradingHoursListMarketsAPI(req);
+    this.tradingHoursLookupMarkets = new TradingHoursLookupMarketsAPI(req);
+    this.tradingHoursMarketDetails = new TradingHoursMarketDetailsAPI(req);
+    this.tradingHoursMarketStatus = new TradingHoursMarketStatusAPI(req);
+
+    // US Treasury rates
+    this.ustBillRates = new USTBillRatesAPI(req);
+    this.ustLongTermRates = new USTLongTermRatesAPI(req);
+    this.ustYieldRates = new USTYieldRatesAPI(req);
+    this.ustRealYieldRates = new USTRealYieldRatesAPI(req);
+
+    // Illio market insights (Marketplace)
+    this.illioBestWorst = new IllioBestWorstAPI(req);
+    this.illioBetaBands = new IllioBetaBandsAPI(req);
+    this.illioLargestVolatility = new IllioLargestVolatilityAPI(req);
+    this.illioPerformanceInsights = new IllioPerformanceInsightsAPI(req);
+    this.illioPerformanceVsMarket = new IllioPerformanceVsMarketAPI(req);
+    this.illioRiskInsights = new IllioRiskInsightsAPI(req);
+    this.illioRiskReturn = new IllioRiskReturnAPI(req);
+    this.illioVolatilityBands = new IllioVolatilityBandsAPI(req);
+
+    // Investverte ESG (Marketplace)
+    this.investverteListCompanies = new InvestverteListCompaniesAPI(req);
+    this.investverteListCountries = new InvestverteListCountriesAPI(req);
+    this.investverteListSectors = new InvestverteListSectorsAPI(req);
+    this.investverteViewCompany = new InvestverteViewCompanyAPI(req);
+    this.investverteViewCountry = new InvestverteViewCountryAPI(req);
+    this.investverteViewSector = new InvestverteViewSectorAPI(req);
+
+    // PRAAMS (Marketplace)
+    this.praamsBankBalanceSheetByIsin = new PraamsBankBalanceSheetByIsinAPI(req);
+    this.praamsBankBalanceSheetByTicker = new PraamsBankBalanceSheetByTickerAPI(req);
+    this.praamsBankIncomeStatementByIsin = new PraamsBankIncomeStatementByIsinAPI(req);
+    this.praamsBankIncomeStatementByTicker = new PraamsBankIncomeStatementByTickerAPI(req);
+    this.praamsBondAnalyzeByIsin = new PraamsBondAnalyzeByIsinAPI(req);
+    this.praamsReportBondByIsin = new PraamsReportBondByIsinAPI(req);
+    this.praamsReportEquityByIsin = new PraamsReportEquityByIsinAPI(req);
+    this.praamsReportEquityByTicker = new PraamsReportEquityByTickerAPI(req);
+    this.praamsRiskScoringByIsin = new PraamsRiskScoringByIsinAPI(req);
+    this.praamsRiskScoringByTicker = new PraamsRiskScoringByTickerAPI(req);
+    this.praamsSmartScreenerBond = new PraamsSmartScreenerBondAPI(req);
+    this.praamsSmartScreenerEquity = new PraamsSmartScreenerEquityAPI(req);
   }
 
-  async request<T>(options: RequestOptions): Promise<T> {
-    const method = options.method ?? "GET";
-    const baseUrl = options.baseUrl ?? this.baseUrl;
-    const { url, responseType } = this.buildUrl({
-      baseUrl,
-      path: options.path,
-      pathParams: options.pathParams,
-      params: options.params,
-      responseType: options.responseType
-    });
+  // ----- Flat convenience methods (delegate to modules) -------------------
 
-    const fetchImpl = this.fetchImpl ?? globalThis.fetch;
-    if (!fetchImpl) {
-      throw new EODHDConfigError("Fetch API is not available. Provide a fetch implementation.");
-    }
-
-    const { signal, cleanup } = this.createAbortSignal(options.signal);
-
-    const headers: Record<string, string> = { ...options.headers };
-    if (this.userAgent && !headers["User-Agent"]) {
-      headers["User-Agent"] = this.userAgent;
-    }
-
-    try {
-      const response = await fetchImpl(url, { method, headers, signal });
-      if (!response.ok) {
-        const body = await this.safeReadBody(response);
-        throw new EODHDHttpError({
-          status: response.status,
-          statusText: response.statusText,
-          url,
-          body
-        });
-      }
-
-      if (responseType === "text") {
-        return (await response.text()) as T;
-      }
-
-      if (responseType === "arrayBuffer") {
-        return (await response.arrayBuffer()) as T;
-      }
-
-      return (await response.json()) as T;
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        throw new EODHDTimeoutError("Request timed out");
-      }
-      throw error;
-    } finally {
-      cleanup();
-    }
-  }
-
-  async getEod(ticker: string, params?: EodParams): Promise<EodBar[] | number | string> {
-    return this.request({
-      path: "/eod/{ticker}",
-      pathParams: { ticker },
-      params
-    });
+  // Core market data
+  async getEod(ticker: string, params?: EodParams): Promise<EodBar[] | string> {
+    return this.eodHistoricalData.getEod(ticker, params);
   }
 
   async getIntraday(ticker: string, params?: IntradayParams): Promise<IntradayBar[] | string> {
-    return this.request({
-      path: "/intraday/{ticker}",
-      pathParams: { ticker },
-      params
-    });
+    return this.intradayData.getIntraday(ticker, params);
   }
 
-  async getRealTime(ticker: string, params?: RealTimeParams): Promise<RealTimeQuote | RealTimeQuote[] | string> {
-    return this.request({
-      path: "/real-time/{ticker}",
-      pathParams: { ticker },
-      params
-    });
+  async getLiveStockPrices(ticker: string, params?: LiveStockPricesParams): Promise<RealTimeQuote | RealTimeQuote[] | string> {
+    return this.liveStockPrices.getLiveStockPrices(ticker, params);
   }
 
-  async getFundamentals(ticker: string, params?: FundamentalsParams): Promise<FundamentalsResponse | string> {
-    return this.request({
-      path: "/fundamentals/{ticker}",
-      pathParams: { ticker },
-      params
-    });
-  }
-
-  async getDividends(ticker: string, params?: DividendsParams): Promise<DividendRecord[] | string> {
-    return this.request({
-      path: "/div/{ticker}",
-      pathParams: { ticker },
-      params
-    });
-  }
-
-  async getSplits(ticker: string, params?: SplitsParams): Promise<SplitRecord[] | string> {
-    return this.request({
-      path: "/splits/{ticker}",
-      pathParams: { ticker },
-      params
-    });
-  }
-
-  async getHistoricalMarketCap(ticker: string, params?: DateRangeParams & { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/historical-market-cap/{ticker}",
-      pathParams: { ticker },
-      params
-    });
-  }
-
-  async getTechnical(ticker: string, params: TechnicalParams): Promise<unknown> {
-    return this.request({
-      path: "/technical/{ticker}",
-      pathParams: { ticker },
-      params
-    });
+  async getLiveExtendedQuotes(ticker: string, params?: LiveExtendedQuotesParams): Promise<LiveExtendedQuote | string> {
+    return this.liveExtendedQuotes.getLiveExtendedQuotes(ticker, params);
   }
 
   async getTicks(ticker: string, params?: TickParams): Promise<TickTrade[] | string> {
-    return this.request({
-      path: "/ticks/{ticker}",
-      pathParams: { ticker },
-      params
-    });
+    return this.tickData.getTicks(ticker, params);
   }
 
-  async getExchangeList(params?: { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/exchanges-list",
-      params
-    });
+  async getTechnical(ticker: string, params: TechnicalParams): Promise<TechnicalRecord[] | string> {
+    return this.technicalIndicator.getTechnical(ticker, params);
   }
 
-  async getExchangeDetails(exchangeCode: string, params?: { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/exchange-details/{exchangeCode}",
-      pathParams: { exchangeCode },
-      params
-    });
+  async getHistoricalMarketCap(ticker: string, params?: HistoricalMarketCapParams): Promise<HistoricalMarketCapRecord[] | string> {
+    return this.historicalMarketCap.getHistoricalMarketCap(ticker, params);
   }
 
-  async getExchangeSymbols(exchangeCode: string, params?: ExchangeSymbolsParams): Promise<unknown> {
-    return this.request({
-      path: "/exchange-symbol-list/{exchangeCode}",
-      pathParams: { exchangeCode },
-      params
-    });
+  // Fundamentals
+  async getFundamentals(ticker: string, params?: FundamentalsParams): Promise<FundamentalsResponse | string> {
+    return this.fundamentals.getFundamentals(ticker, params);
+  }
+
+  async getBulkFundamentals(exchange: string, params?: BulkFundamentalsParams): Promise<FundamentalsResponse[] | string> {
+    return this.bulkFundamentals.getBulkFundamentals(exchange, params);
+  }
+
+  // Corporate actions
+  async getHistoricalDividends(ticker: string, params?: HistoricalDividendsParams): Promise<DividendRecord[] | string> {
+    return this.historicalDividends.getHistoricalDividends(ticker, params);
+  }
+
+  async getHistoricalSplits(ticker: string, params?: HistoricalSplitsParams): Promise<SplitRecord[] | string> {
+    return this.historicalSplits.getHistoricalSplits(ticker, params);
+  }
+
+  // Bulk
+  async getBulkEodLastDay(exchange: string, params?: BulkEodParams): Promise<BulkEodRecord[] | string> {
+    return this.bulkEod.getBulkEodLastDay(exchange, params);
+  }
+
+  // Calendar
+  async getUpcomingEarnings(params?: UpcomingEarningsParams): Promise<UpcomingEarningsResponse | CalendarEarning[] | string> {
+    return this.upcomingEarnings.getUpcomingEarnings(params);
+  }
+
+  async getUpcomingIpos(params?: UpcomingIposParams): Promise<UpcomingIposResponse | CalendarIpo[] | string> {
+    return this.upcomingIpos.getUpcomingIpos(params);
+  }
+
+  async getUpcomingSplits(params?: UpcomingSplitsParams): Promise<UpcomingSplitsResponse | CalendarSplitRecord[] | string> {
+    return this.upcomingSplits.getUpcomingSplits(params);
+  }
+
+  async getUpcomingDividends(params?: UpcomingDividendsParams): Promise<UpcomingDividendsResponse | string> {
+    return this.upcomingDividends.getUpcomingDividends(params);
+  }
+
+  async getEarningsTrends(params: EarningsTrendsParams): Promise<EarningsTrend[] | Record<string, EarningsTrend> | string> {
+    return this.earningsTrends.getEarningsTrends(params);
+  }
+
+  // Exchanges & search
+  async getExchangesList(params?: ExchangesListParams): Promise<ExchangeInfo[] | string> {
+    return this.exchangesList.getExchangesList(params);
+  }
+
+  async getExchangeDetails(exchangeCode: string, params?: ExchangeDetailsParams): Promise<ExchangeDetails | string> {
+    return this.exchangeDetails.getExchangeDetails(exchangeCode, params);
+  }
+
+  async getExchangeTickers(exchangeCode: string, params?: ExchangeTickersParams): Promise<ExchangeSymbol[] | string> {
+    return this.exchangeTickers.getExchangeTickers(exchangeCode, params);
+  }
+
+  async searchSymbols(query: string, params?: SearchParams): Promise<SearchResult[] | string> {
+    return this.search.searchSymbols(query, params);
+  }
+
+  async getSymbolChangeHistory(params?: SymbolChangeHistoryParams): Promise<SymbolChange[] | string> {
+    return this.symbolChangeHistory.getSymbolChangeHistory(params);
+  }
+
+  // News & sentiment
+  async getFinancialNews(params?: FinancialNewsParams): Promise<NewsArticle[] | string> {
+    return this.financialNews.getFinancialNews(params);
+  }
+
+  async getSentimentData(params?: SentimentDataParams): Promise<SentimentRecord[] | Record<string, SentimentRecord> | string> {
+    return this.sentimentData.getSentimentData(params);
+  }
+
+  async getNewsWordWeights(params?: NewsWordWeightsParams): Promise<Record<string, unknown>[] | string> {
+    return this.newsWordWeights.getNewsWordWeights(params);
+  }
+
+  // Insider transactions
+  async getInsiderTransactions(params?: InsiderTransactionsParams): Promise<InsiderTransaction[] | string> {
+    return this.insiderTransactions.getInsiderTransactions(params);
+  }
+
+  // Macro & economic
+  async getMacroIndicator(country: string, params: MacroIndicatorParams): Promise<MacroIndicatorRecord[] | string> {
+    return this.macroIndicators.getMacroIndicator(country, params);
   }
 
   async getEconomicEvents(params?: EconomicEventsParams): Promise<EconomicEvent[] | string> {
-    return this.request({
-      path: "/economic-events",
-      params
-    });
+    return this.economicEvents.getEconomicEvents(params);
   }
 
-  async getCalendarEarnings(params?: CalendarParams): Promise<unknown> {
-    return this.request({
-      path: "/calendar/earnings",
-      params
-    });
+  // Screener
+  async getStockScreener(params?: StockScreenerParams): Promise<StockScreenerResponse | string> {
+    return this.stockScreener.getStockScreener(params);
   }
 
-  async getCalendarIpos(params?: CalendarParams): Promise<unknown> {
-    return this.request({
-      path: "/calendar/ipos",
-      params
-    });
+  // Options
+  async getOptionsContracts(params?: OptionsContractsParams): Promise<OptionsContract[] | Record<string, unknown> | string> {
+    return this.optionsContracts.getOptionsContracts(params);
   }
 
-  async getCalendarSplits(params?: CalendarParams): Promise<unknown> {
-    return this.request({
-      path: "/calendar/splits",
-      params
-    });
+  async getOptionsEod(params?: OptionsEodParams): Promise<OptionsEodRecord[] | Record<string, unknown> | string> {
+    return this.optionsEod.getOptionsEod(params);
   }
 
-  async getEarningsTrends(params?: CalendarParams): Promise<unknown> {
-    return this.request({
-      path: "/calendar/trends",
-      params
-    });
+  async getOptionsUnderlyings(params?: OptionsUnderlyingsParams): Promise<string[] | Record<string, unknown> | string> {
+    return this.optionsUnderlyings.getOptionsUnderlyings(params);
   }
 
-  async getMacroIndicator(country: string, params: MacroIndicatorParams): Promise<MacroIndicatorRecord[] | string> {
-    return this.request({
-      path: "/macro-indicator/{country}",
-      pathParams: { country },
-      params
-    });
+  // Indices
+  async getIndicesList(params?: IndicesListParams): Promise<IndexInfo[] | string> {
+    return this.indicesList.getIndicesList(params);
   }
 
-  async getNews(params: NewsParams): Promise<NewsArticle[] | string> {
-    return this.request({
-      path: "/news",
-      params
-    });
+  async getIndexComponents(symbol: string, params?: IndexComponentsParams): Promise<IndexComponent[] | Record<string, unknown> | string> {
+    return this.indexComponents.getIndexComponents(symbol, params);
   }
 
-  async getSentiments(params: SentimentParams): Promise<SentimentRecord[] | string> {
-    return this.request({
-      path: "/sentiments",
-      params
-    });
+  // CBOE
+  async getCboeIndicesList(params?: CboeIndicesListParams): Promise<CboeIndex[] | string> {
+    return this.cboeIndicesList.getCboeIndicesList(params);
   }
 
-  async getNewsWordWeights(params: NewsWordWeightsParams): Promise<unknown> {
-    return this.request({
-      baseUrl: EODHD_AUX_BASE_URL,
-      path: "/news-word-weights",
-      params
-    });
+  async getCboeIndexData(params: CboeIndexDataParams): Promise<CboeIndex[] | string> {
+    return this.cboeIndexData.getCboeIndexData(params);
   }
 
-  async getInsiderTransactions(params: { s?: string | string[]; from?: string; to?: string; limit?: number; fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      baseUrl: EODHD_AUX_BASE_URL,
-      path: "/insider-transactions",
-      params
-    });
-  }
-
-  async getScreener(params?: ScreenerParams): Promise<ScreenerResult | string> {
-    return this.request({
-      path: "/screener",
-      params
-    });
-  }
-
-  async searchSymbols(query: string, params?: { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/search/{query}",
-      pathParams: { query },
-      params
-    });
-  }
-
-  async getSymbolChangeHistory(params?: { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/symbol-change-history",
-      params
-    });
-  }
-
-  async getOptionsContracts(params?: OptionsParams): Promise<unknown> {
-    return this.request({
-      path: "/mp/unicornbay/options/contracts",
-      params
-    });
-  }
-
-  async getOptionsEod(params?: OptionsParams): Promise<unknown> {
-    return this.request({
-      path: "/mp/unicornbay/options/eod",
-      params
-    });
-  }
-
-  async getOptionsUnderlyings(params?: OptionsParams): Promise<unknown> {
-    return this.request({
-      path: "/mp/unicornbay/options/underlying-symbols",
-      params
-    });
-  }
-
-  async getIndicesList(params?: { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/mp/unicornbay/spglobal/list",
-      params
-    });
-  }
-
-  async getIndexComponents(symbol: string, params?: IndexComponentsParams): Promise<unknown> {
-    return this.request({
-      path: "/mp/unicornbay/spglobal/comp/{symbol}",
-      pathParams: { symbol },
-      params
-    });
-  }
-
-  async getCboeIndicesList(params?: CboeIndicesListParams): Promise<unknown> {
-    return this.request({
-      path: "/cboe/indices",
-      params
-    });
-  }
-
-  async getCboeIndexData(params: CboeIndexParams): Promise<unknown> {
-    return this.request({
-      path: "/cboe/index",
-      params
-    });
-  }
-
-  async getBulkEodLastDay(exchange: string, params?: { fmt?: "json" | "csv" }): Promise<unknown> {
-    return this.request({
-      path: "/eod-bulk-last-day/{exchange}",
-      pathParams: { exchange },
-      params
-    });
-  }
-
-  async getInternalUser(): Promise<unknown> {
-    return this.request({
-      path: "/internal-user"
-    });
-  }
-
+  // Logos
   async getLogo(symbol: string): Promise<ArrayBuffer> {
-    return this.request({
-      baseUrl: EODHD_AUX_BASE_URL,
-      path: "/logo/{symbol}",
-      pathParams: { symbol },
-      responseType: "arrayBuffer"
-    });
+    return this.logo.getLogo(symbol);
   }
 
-  private buildUrl(options: {
-    baseUrl: string;
-    path: string;
-    pathParams?: Record<string, string | number>;
-    params?: Record<string, QueryValue>;
-    responseType?: "json" | "text" | "arrayBuffer";
-  }): { url: string; responseType: "json" | "text" | "arrayBuffer" } {
-    const baseUrl = options.baseUrl.replace(/\/+$/, "");
-    const path = options.path.startsWith("/") ? options.path : `/${options.path}`;
-    const resolvedPath = path.replace(/\{([^}]+)\}/g, (_match, key) => {
-      const value = options.pathParams?.[key];
-      if (value === undefined || value === null) {
-        throw new EODHDConfigError(`Missing path parameter: ${key}`);
-      }
-      return encodeURIComponent(String(value));
-    });
-
-    const url = new URL(`${baseUrl}${resolvedPath}`);
-    const mergedParams: Record<string, QueryValue> = {
-      ...this.defaultParams,
-      ...options.params
-    };
-
-    mergedParams.api_token = this.apiKey;
-
-    Object.entries(mergedParams).forEach(([key, value]) => {
-      if (value === undefined || value === null) {
-        return;
-      }
-      if (Array.isArray(value)) {
-        const joined = value.map((item) => this.formatQueryValue(item)).join(",");
-        if (joined.length > 0) {
-          url.searchParams.set(key, joined);
-        }
-        return;
-      }
-      url.searchParams.set(key, this.formatQueryValue(value));
-    });
-
-    const responseType = options.responseType ?? this.inferResponseType(options.params);
-
-    return { url: url.toString(), responseType };
+  async getLogoSvg(symbol: string): Promise<string> {
+    return this.logoSvg.getLogoSvg(symbol);
   }
 
-  private formatQueryValue(value: string | number | boolean | Date): string {
-    if (value instanceof Date) {
-      return value.toISOString();
-    }
-    if (typeof value === "boolean") {
-      return value ? "1" : "0";
-    }
-    return String(value);
+  // User
+  async getUser(): Promise<UserInfo> {
+    return this.user.getUser();
   }
 
-  private inferResponseType(params?: Record<string, QueryValue>): "json" | "text" | "arrayBuffer" {
-    const fmt = params?.fmt;
-    if (fmt === "csv" || fmt === "xml") {
-      return "text";
-    }
-    return "json";
+  // Marketplace tick data
+  async getMarketplaceTickData(params: MarketplaceTickDataParams): Promise<MarketplaceTickDataResponse> {
+    return this.marketplaceTickData.getMarketplaceTickData(params);
   }
 
-  private createAbortSignal(signal?: AbortSignal): { signal: AbortSignal; cleanup: () => void } {
-    const controller = new AbortController();
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    if (this.timeoutMs > 0) {
-      timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
-    }
-
-    if (signal) {
-      if (signal.aborted) {
-        controller.abort();
-      } else {
-        signal.addEventListener("abort", () => controller.abort(), { once: true });
-      }
-    }
-
-    return {
-      signal: controller.signal,
-      cleanup: () => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-      }
-    };
+  // TradingHours
+  async getTradingHoursListMarkets(params?: TradingHoursListParams): Promise<TradingHoursMarket[]> {
+    return this.tradingHoursListMarkets.getTradingHoursListMarkets(params);
   }
 
-  private async safeReadBody(response: Response): Promise<string | undefined> {
-    try {
-      return await response.text();
-    } catch {
-      return undefined;
-    }
+  async getTradingHoursLookupMarkets(params?: TradingHoursLookupParams): Promise<TradingHoursMarket[]> {
+    return this.tradingHoursLookupMarkets.getTradingHoursLookupMarkets(params);
+  }
+
+  async getTradingHoursMarketDetails(params: TradingHoursMarketDetailsParams): Promise<TradingHoursMarketDetail[]> {
+    return this.tradingHoursMarketDetails.getTradingHoursMarketDetails(params);
+  }
+
+  async getTradingHoursMarketStatus(params: TradingHoursMarketStatusParams): Promise<Record<string, TradingHoursMarketStatus>> {
+    return this.tradingHoursMarketStatus.getTradingHoursMarketStatus(params);
+  }
+
+  // US Treasury rates
+  async getUSTBillRates(params?: USTRatesParams): Promise<USTPaginatedResponse<USTBillRate>> {
+    return this.ustBillRates.getUSTBillRates(params);
+  }
+
+  async getUSTLongTermRates(params?: USTRatesParams): Promise<USTPaginatedResponse<USTLongTermRate>> {
+    return this.ustLongTermRates.getUSTLongTermRates(params);
+  }
+
+  async getUSTYieldRates(params?: USTRatesParams): Promise<USTPaginatedResponse<USTYieldRate>> {
+    return this.ustYieldRates.getUSTYieldRates(params);
+  }
+
+  async getUSTRealYieldRates(params?: USTRatesParams): Promise<USTPaginatedResponse<USTRealYieldRate>> {
+    return this.ustRealYieldRates.getUSTRealYieldRates(params);
+  }
+
+  // Illio
+  async getIllioBestWorst(indexId: string): Promise<IllioChapterInsight> {
+    return this.illioBestWorst.getIllioBestWorst(indexId);
+  }
+
+  async getIllioBetaBands(indexId: string): Promise<IllioChapterInsight> {
+    return this.illioBetaBands.getIllioBetaBands(indexId);
+  }
+
+  async getIllioLargestVolatility(indexId: string): Promise<IllioChapterInsight> {
+    return this.illioLargestVolatility.getIllioLargestVolatility(indexId);
+  }
+
+  async getIllioPerformanceInsights(indexId: string): Promise<IllioCategoryInsight> {
+    return this.illioPerformanceInsights.getIllioPerformanceInsights(indexId);
+  }
+
+  async getIllioPerformanceVsMarket(indexId: string): Promise<IllioChapterInsight> {
+    return this.illioPerformanceVsMarket.getIllioPerformanceVsMarket(indexId);
+  }
+
+  async getIllioRiskInsights(indexId: string): Promise<IllioCategoryInsight> {
+    return this.illioRiskInsights.getIllioRiskInsights(indexId);
+  }
+
+  async getIllioRiskReturn(indexId: string): Promise<IllioChapterInsight> {
+    return this.illioRiskReturn.getIllioRiskReturn(indexId);
+  }
+
+  async getIllioVolatilityBands(indexId: string): Promise<IllioChapterInsight> {
+    return this.illioVolatilityBands.getIllioVolatilityBands(indexId);
+  }
+
+  // Investverte ESG
+  async getInvestverteListCompanies(): Promise<InvestverteCompany[]> {
+    return this.investverteListCompanies.getInvestverteListCompanies();
+  }
+
+  async getInvestverteListCountries(): Promise<InvestverteCountry[]> {
+    return this.investverteListCountries.getInvestverteListCountries();
+  }
+
+  async getInvestverteListSectors(): Promise<InvestverteSector[]> {
+    return this.investverteListSectors.getInvestverteListSectors();
+  }
+
+  async getInvestverteViewCompany(symbol: string, params?: InvestverteEsgViewParams): Promise<InvestverteEsgScore[]> {
+    return this.investverteViewCompany.getInvestverteViewCompany(symbol, params);
+  }
+
+  async getInvestverteViewCountry(symbol: string, params?: InvestverteEsgViewParams): Promise<InvestverteCountryView[]> {
+    return this.investverteViewCountry.getInvestverteViewCountry(symbol, params);
+  }
+
+  async getInvestverteViewSector(symbol: string): Promise<InvestverteSectorView> {
+    return this.investverteViewSector.getInvestverteViewSector(symbol);
+  }
+
+  // PRAAMS
+  async getPraamsBankBalanceSheetByIsin(isin: string): Promise<PraamsResponse<PraamsBankBalanceSheetRecord>> {
+    return this.praamsBankBalanceSheetByIsin.getPraamsBankBalanceSheetByIsin(isin);
+  }
+
+  async getPraamsBankBalanceSheetByTicker(ticker: string): Promise<PraamsResponse<PraamsBankBalanceSheetRecord>> {
+    return this.praamsBankBalanceSheetByTicker.getPraamsBankBalanceSheetByTicker(ticker);
+  }
+
+  async getPraamsBankIncomeStatementByIsin(isin: string): Promise<PraamsResponse<PraamsBankIncomeStatementRecord>> {
+    return this.praamsBankIncomeStatementByIsin.getPraamsBankIncomeStatementByIsin(isin);
+  }
+
+  async getPraamsBankIncomeStatementByTicker(ticker: string): Promise<PraamsResponse<PraamsBankIncomeStatementRecord>> {
+    return this.praamsBankIncomeStatementByTicker.getPraamsBankIncomeStatementByTicker(ticker);
+  }
+
+  async getPraamsBondAnalyzeByIsin(isin: string): Promise<PraamsResponse<PraamsBondAnalysis>> {
+    return this.praamsBondAnalyzeByIsin.getPraamsBondAnalyzeByIsin(isin);
+  }
+
+  async getPraamsReportBondByIsin(isin: string, params: PraamsReportParams): Promise<ArrayBuffer> {
+    return this.praamsReportBondByIsin.getPraamsReportBondByIsin(isin, params);
+  }
+
+  async getPraamsReportEquityByIsin(isin: string, params: PraamsReportParams): Promise<ArrayBuffer> {
+    return this.praamsReportEquityByIsin.getPraamsReportEquityByIsin(isin, params);
+  }
+
+  async getPraamsReportEquityByTicker(ticker: string, params: PraamsReportParams): Promise<ArrayBuffer> {
+    return this.praamsReportEquityByTicker.getPraamsReportEquityByTicker(ticker, params);
+  }
+
+  async getPraamsRiskScoringByIsin(isin: string): Promise<PraamsResponse<PraamsEquityAnalysis>> {
+    return this.praamsRiskScoringByIsin.getPraamsRiskScoringByIsin(isin);
+  }
+
+  async getPraamsRiskScoringByTicker(ticker: string): Promise<PraamsResponse<PraamsEquityAnalysis>> {
+    return this.praamsRiskScoringByTicker.getPraamsRiskScoringByTicker(ticker);
+  }
+
+  async getPraamsSmartScreenerBond(body: PraamsScreenerBody, params?: PraamsScreenerParams): Promise<PraamsScreenerResponse> {
+    return this.praamsSmartScreenerBond.getPraamsSmartScreenerBond(body, params);
+  }
+
+  async getPraamsSmartScreenerEquity(body: PraamsScreenerBody, params?: PraamsScreenerParams): Promise<PraamsScreenerResponse> {
+    return this.praamsSmartScreenerEquity.getPraamsSmartScreenerEquity(body, params);
   }
 }
